@@ -1,58 +1,43 @@
+var renderer = PIXI.autoDetectRenderer(1440, 1024,{backgroundColor : 0x000000});
+document.body.appendChild(renderer.view);
 
-          var renderer = new PIXI.autoDetectRenderer(window.innerWidth, 600,{backgroundColor : 0x000000})
-        	document.body.appendChild(renderer.view);
+// create the root of the scene graph
+var stage = new PIXI.Container();
 
-          var stage = new PIXI.Container(0x000000);
+// create a new Sprite using the texture
+var background = new PIXI.Sprite(PIXI.Texture.fromImage('./images/background.png'));
+background.height = 1024;
+background.width = 1440;
 
-          var socket = io();
+// move the sprite to the center of the screen
+background.position.x = 0;
+background.position.y = 0;
 
-          var graphics = new PIXI.Graphics()
+var player = new PIXI.Sprite(PIXI.Texture.fromImage('./images/background.png'));
+var walkingFrames = [];
 
-          var points = [];
-          var pointSpacing = 10;
+walkingFrames.push(PIXI.Texture.fromImage('./images/Walk1.png'));
+walkingFrames.push(PIXI.Texture.fromImage('./images/Walk2.png'));
 
-          animate();
+walkAnimation = new PIXI.extras.AnimatedSprite(walkingFrames);
 
-          function animate() {
-            requestAnimationFrame( animate );
-            renderer.render(stage);
-          }
+walkAnimation.play()
+walkAnimation.animationSpeed = 0.1;
 
-          socket.on('mood data', function(msg){
-            // $('#messages').append($('<li>').text(msg));
-            points.push(msg);
-            // console.log('recieved: ' + msg);
-            // console.log('length: ' + points.length + ' value: ')
-            graphics.clear();
-            graphics.beginFill(0xFF0000);
+walkAnimation.position.x = 100;
+walkAnimation.position.y = 500;
 
-            var pointScreenIndex = 0;
-            if(points.length > renderer.width) {
-              pointScreenIndex = points.length - renderer.width;
-            }
+stage.addChild(background);
+stage.addChild(walkAnimation);
 
-            for(var i = pointScreenIndex; i < points.length; i++) {
-              graphics.lineStyle(2, 0xFF0000);
+// start animating
+animate();
+function animate() {
+    requestAnimationFrame(animate);
 
-              // Drae lines between points
-              if( i > 0) {
-                graphics.moveTo(renderer.width - ((points.length - (i-1)) * pointSpacing), (points[i - 1] * renderer.height) / 1024);
-                graphics.lineTo(renderer.width - ((points.length - i) * pointSpacing), (points[i] * renderer.height) / 1024);
-              }
+    // just for fun, let's rotate mr rabbit a little
+    // bunny.rotation += 0.1;
 
-              // Draw points
-              graphics.drawCircle(window.innerWidth - ((points.length - i) * pointSpacing), (points[i] * renderer.height) / 1024, 2);
-              // console.log('stage.height: ' + stage.height)
-
-            }
-            stage.addChild(graphics);
-
-
-
-          });
-        </script>
-
-        <button id="save_button" type="button">Save Data</button>
-
-      </body>
-    </html>
+    // render the container
+    renderer.render(stage);
+}
